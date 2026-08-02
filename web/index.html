@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="la">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bibliothēca · Index Librōrum</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css?v=24">
+</head>
+<body>
+
+<!-- ============== 顶部 masthead (报纸风报头) ============== -->
+<header class="masthead">
+  <!-- v17: 顶部一行三栏对称 grid: 左 1fr 平衡 / 报头名居中 / 右 1fr 放控件组,
+       控件与报头名同一水平线垂直中心对齐, 不再 absolute 错位 -->
+  <div class="masthead-top">
+    <div class="journal-name">LLPSI+++ · Bibliothēca</div>
+    <div class="masthead-controls">
+      <div id="visitor-stats" class="visitor-stats" aria-label="Statistica vīsitātiōnum"></div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Tēma">Nox/Diēs</button>
+    </div>
+  </div>
+  <div class="rule-black"></div>
+  <div class="rule-red"></div>
+  <h1 class="title">Bibliothēca</h1>
+  <p class="subtitle">Index Librōrum · Capitibus Coniūncta</p>
+  <div class="rule-bottom"></div>
+</header>
+
+<!-- ============== 筛选栏 (折叠式, 复用 template <details> 模式) ==============
+     默认收起, 点击 summary 展开。4 维: Liber/Genus/Aetas/Fides
+     筛选逻辑: AND 跨组 (4 维同时满足), OR 组内 (同组多选任一匹配) -->
+<details class="filter-collapsible" id="filter-details">
+  <summary class="filter-summary">
+    <span class="filter-summary-icon">▸</span>
+    <span class="filter-summary-text">Filtrī</span>
+    <span class="filter-stats" id="filter-stats">— / — segmenta</span>
+  </summary>
+  <nav class="filter-bar" aria-label="Filtrī">
+    <div class="filter-group" data-filter="book">
+      <span class="filter-label">Liber</span>
+      <div class="filter-options" id="filter-book"></div>
+    </div>
+    <div class="filter-group" data-filter="genre">
+      <span class="filter-label">Genus</span>
+      <div class="filter-options" id="filter-genre"></div>
+    </div>
+    <div class="filter-group" data-filter="era">
+      <span class="filter-label">Aetas</span>
+      <div class="filter-options" id="filter-era"></div>
+    </div>
+    <div class="filter-group" data-filter="credibility">
+      <span class="filter-label">Fides<span class="filter-tip-icon" tabindex="0">?<span class="tip">
+            <span class="tip-key">Crēdibilitās</span>
+            <strong>S</strong> — Fōns auctōritātis (ēditiō cūrāta)<br>
+            <strong>A</strong> — Recognitum ā hominibus<br>
+            <strong>B</strong> — Emendātum partim<br>
+            <strong>C</strong> — OCR crūdum, fortasse cum errōribus<br>
+            <strong>D</strong> — ĀI generātum, nōndum probātum
+          </span></span></span>
+      <div class="filter-options" id="filter-credibility"></div>
+    </div>
+    <div class="filter-actions">
+      <button id="select-all" type="button">Omnia</button>
+      <button id="clear-all" type="button">Nihil</button>
+    </div>
+  </nav>
+</details>
+
+<!-- ============== 卡片矩阵 (app.js 渲染目标) ============== -->
+<!-- ============== 章节索引条 (v14: 全 LLPSI 章节快速跳转) ============== -->
+<nav class="chapter-index" id="chapter-index" aria-label="Capitula"></nav>
+<main class="matrix-block" id="matrix-block">
+  <p class="loading">Legēns…</p>
+</main>
+
+<!-- ============== 页脚 ============== -->
+<footer class="colophon">
+  <div class="rule-red"></div>
+  <p>LLPSI+++ · Bibliothēca · Index Librōrum · MMXXVI</p>
+</footer>
+
+<script src="theme.js?v=8"></script>
+<script src="app.js?v=30"></script>
+<script src="stats.js?v=2"></script>
+
+<!-- GoatCounter 访问统计 (已配置: maxlinkeralpha) -->
+<script data-goatcounter="https://maxlinkeralpha.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

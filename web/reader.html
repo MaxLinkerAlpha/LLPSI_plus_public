@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--
+  reader.html — 阅读页 (v5 · 用户反馈优化)
+  功能: 接收 ?segment_id=xxx, 渲染对应 segment 的正文 + sticky 元信息栏
+  元信息栏 (7 字段): Liber / Auctor / Genus / Aetas / Longitudo / Fides / Origo / Gradus
+  v5 变更: 移除 Pagina OCR; Fides 加 hover tooltip (复用 template .ent .tip 样式)
+  依赖: style.css (外联), theme.js (主题切换), reader.js (主逻辑)
+-->
+<html lang="la">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lector · Segment</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body>
+  <!-- ============== v6: 返回按钮栏 (sticky 顶部, 独立) ============== -->
+  <nav class="back-bar">
+    <a href="index.html" class="back-button">&larr; Redi ad Indicem</a>
+  </nav>
+  <!-- ============== v6: 元信息栏 (不 sticky, 透明 + 底部细线) ============== -->
+  <nav class="reader-nav">
+    <div class="info-bar">
+      <span class="info-item"><span class="info-key">Liber</span><span class="info-val" id="info-book">—</span></span>
+      <span class="info-item"><span class="info-key">Auctor</span><span class="info-val" id="info-author">—</span></span>
+      <span class="info-item"><span class="info-key">Genus</span><span class="info-val" id="info-genre">—</span></span>
+      <span class="info-item"><span class="info-key">Aetas</span><span class="info-val" id="info-era">—</span></span>
+      <span class="info-item"><span class="info-key">Longitudo</span><span class="info-val" id="info-length">—</span></span>
+      <!-- Fides: 带 hover tooltip, 复用 template .ent .tip 样式
+           tooltip 讲解 C/B/A/S/D 五档可信度区别 -->
+      <span class="info-item"><span class="info-key">Fides</span>
+        <span class="info-val ent" id="info-credibility" tabindex="0">—
+          <span class="tip">
+            <span class="tip-key">Crēdibilitās</span>
+            <strong>S</strong> — Fōns auctōritātis (ēditiō cūrāta)<br>
+            <strong>A</strong> — Recognitum ā hominibus<br>
+            <strong>B</strong> — Emendātum partim<br>
+            <strong>C</strong> — OCR crūdum, fortasse cum errōribus<br>
+            <strong>D</strong> — ĀI generātum, nōndum probātum
+          </span>
+        </span>
+      </span>
+      <span class="info-item"><span class="info-key">Origo</span><a class="info-val" id="info-source" target="_blank" rel="noopener noreferrer">—</a></span>
+      <span class="info-item"><span class="info-key">Gradus</span><span class="info-val" id="info-level">—</span></span>
+    </div>
+  </nav>
+
+  <!-- ============== 章节标题区 ============== -->
+  <header class="segment-header">
+    <h1 id="section-title">—</h1>
+    <p class="chapter-title" id="chapter-title">—</p>
+  </header>
+
+  <!-- ============== 正文容器 ============== -->
+  <main class="segment-content" id="segment-content">
+    <p class="loading">Legēns…</p>
+  </main>
+
+  <!-- ============== 主题切换按钮 ============== -->
+  <button class="theme-toggle" id="theme-toggle">Nox/Diēs</button>
+
+  <script src="theme.js?v=8"></script>
+  <script src="reader.js?v=21"></script>
+
+  <!-- GoatCounter 访问统计 (已配置: maxlinkeralpha) -->
+  <script data-goatcounter="https://maxlinkeralpha.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

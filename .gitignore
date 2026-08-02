@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Source PDFs
+source/
+
+# OCR raw text (page_*.txt, cap*_macrons_*.txt)
+# INDEX.md and README.md are tracked
+OCR/**/*.txt
+
+# Auto-generated / intermediate outputs
+.timed/
+.tmp*/
+
+# Python cache
+__pycache__/
+
+# Environment variables (API keys, secrets)
+.env
+
+# IDE internal files (public branch only)
+.trae/

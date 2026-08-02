@@ -1,0 +1,1771 @@
+/* ============================================================
+   LLPSI+++ M2 · product 版样式 v3.7+9 (2026-06-12)
+   母版: HTML/Themes_AcademicJournal.html (Caesar DBG 注释版)
+   设计规范: CRAP (Contrast/Repetition/Alignment/Proximity) @design-crap SKILL
+   ============================================================
+   v3.7+9 关键变化:
+   - .ent / .margin: 取消所有负 margin (margin: 0) (v3.7+6~+8 反复试探 -0.25em
+     造成 "Syria, Iūlia" 中逗号紧贴 Iūlia, 同时还造成 "Iūlia?" 中问号重叠)
+   - HTML 改紧凑写法: <span> 紧跟前词 (取消多余缩进空格), 信任浏览器默认间距
+   v3.7+8 关键变化:
+   - .margin .q 取消 color: var(--accent-2) (用户反馈: 有悬浮注释的单词与正文同色)
+   - .ent / .margin 取消 margin-right: -0.25em (造成后续标点重叠, 如 Iūlia?)
+   v3.7+7 关键变化:
+   - .ent / .margin: vertical-align 回到 baseline (v3.7+5 改的 text-top 导致上下错位)
+   - .ent / .margin: line-height: 1.85 (与 .two-col p 一致, 避免内文与外文基线错位)
+   v3.7+6 关键变化:
+   - .ent / .margin: margin: 0 -0.25em (抵消 HTML 缩进产生的空格文本节点)
+   - .two-col / .two-col p: text-align: left !important (强制覆盖, 防浏览器 fallback)
+   v3.7+5 关键变化:
+   - .two-col / .two-col p: text-align: justify → left
+   - 取消 text-indent
+   - hyphens: auto → none
+   v3.7+4 关键变化:
+   - 边注: † → 小圆点角标 (●, ::after 替代 ::before)
+   - .q 可见 (display:inline, 不再 clip 隐藏)
+   - 边注行内嵌入 (不再独立成段)
+   v3.7+3 关键变化:
+   - 根绝 tooltip 横向/纵向错位: .ent/.margin 改为 display:inline-block,
+     确保绝对定位子元素 (.tip) 的包含块为可预测的矩形盒
+   - .ent .tip / .margin .tip: bottom:100% + margin-bottom:8px 替代
+     bottom:135%
+   v3.7 关键变化:
+   - tooltip 根绝泄漏 (HTML5 解析铁律): <div class="tip-grid"> → <span class="tip-grid">
+     + display: grid → display: inline-grid (HTML5 解析强制闭合 inline
+     元素含 block 元素, 改为 span+inline-grid 后, grid 容器不再逃出 .tip)
+   - 边注触发器改 † 脚注符号 (用户决策): 不再用 1px dashed 下划线,
+     改为 ::before 伪元素渲染 † (小字上标, 酒红色).
+     根除 .q 与 .ent 的 .q 重复显示同一词 (如 Itālia) 的问题
+   - 栏宽统一: grammatica/ll-ext-block 去左右 padding, 与正文 edge-to-edge
+   - 语法正文: 10pt→12pt (与主阅读区一致)
+   - 底部翻页控件: nav-bottom
+   - doi 合并: FR · Cap. I · pp. 9–14 内联到 Capitulum Primum
+   - 卡片精简: 隐藏预览/元信息, 仅留书名+匹配度
+   ============================================================ */
+
+/* === 主题变量 === */
+:root {
+  --bg:          #FFFFFF;
+  --fg:          #111111;
+  --fg-soft:     #444444;
+  --fg-mute:     #888888;
+  --accent:      #B22A2A;          /* 酒红 (light) */
+  --accent-2:    #8B1F1F;          /* 暗酒红 */
+  --accent-soft: #FFF8E1;
+  --rule:        #000000;
+  --rule-soft:   #DDDDDD;
+  --bg-soft:     #FAFAF6;
+  --bg-card:     #FFFFFF;
+  --border-soft: #D4C5A0;
+  --tip-bg:      #1A1A1A;
+  --tip-fg:      #F5F5F5;
+  --tip-bg-light: #FBF7EC;         /* 日间 tooltip 背景: 米黄/纸色 */
+  --tip-fg-light: #1A1A1A;         /* 日间 tooltip 前景: 深色 */
+  --shadow:      0 2px 8px rgba(0,0,0,0.25);
+  --nav-bg:      #F4F0E8;
+  --nav-active:  #B22A2A;
+  --margin-line: #888888;          /* 边注虚线色 */
+}
+
+[data-theme="dark"] {
+  --bg:          #1A1B1E;          /* 中性暗背景 (去红调, M3 夜间去红) */
+  --fg:          #E4E6EB;          /* 中性亮灰 (去红调) */
+  --fg-soft:     #A8AEB8;          /* 中性灰 (去红调) */
+  --fg-mute:     #6A7079;          /* 中性暗灰 (去红调) */
+  --accent:      #C85050;          /* 亮酒红 (用户决策: 夜间黄色改酒红) */
+  --accent-2:    #9E3A3A;          /* 次级暗酒红 */
+  --accent-soft: #2E2020;          /* 暗红调背景 (hover) */
+  --rule:        #3A3D44;          /* 中性暗分隔线 */
+  --rule-soft:   #2A2D33;          /* 中性暗分隔线 (soft) */
+  --bg-soft:     #222327;          /* 中性暗背景 (soft) */
+  --bg-card:     #26282D;          /* 中性暗卡片背景 */
+  --border-soft: #3A3D44;          /* 中性暗边框 */
+  --tip-bg:      #0F0F12;          /* 中性暗背景 (去红调, M3 夜间去红) */
+  --tip-fg:      #E4E6EB;          /* 中性亮灰 (去红调) */
+  --shadow:      0 2px 8px rgba(0,0,0,0.7);
+  --nav-bg:      #222327;          /* 中性暗背景 (去红调) */
+  --nav-active:  #C9A567;          /* 深琥珀 (与 accent 一致) */
+  --margin-line: #555A60;          /* 中性暗灰 (去红调) */
+}
+
+/* === 基础 === */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Georgia, "Times New Roman", "Iowan Old Style", "Source Han Serif SC", "Noto Serif CJK SC", serif;
+  font-size: 10.5pt;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body { padding: 36px 20px 48px; }
+.page { max-width: 800px; margin: 0 auto; background: var(--bg); }
+
+/* 全局切换动画 */
+body, .page, .masthead, .two-col, .grammatica, .ll-ext-block,
+.colophon, .nav-controls, .theme-toggle, .ent, .margin {
+  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+/* ============= 主题切换按钮 (v3.6: 去边框/去圆点, 仅文字) ============= */
+.theme-toggle {
+  background: transparent; color: var(--fg-mute);
+  border: none;
+  padding: 4px 8px; cursor: pointer;
+  font-family: inherit; font-size: 8pt;
+  font-variant: small-caps; letter-spacing: 0.12em;
+  transition: color 0.35s ease;
+}
+.theme-toggle:hover { color: var(--accent); }
+.theme-toggle:active { transform: scale(0.96); }
+
+/* ============= 访问量统计 (v10: GoatCounter 集成) ============= */
+.visitor-stats {
+  font-family: inherit; font-size: 8pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.10em;
+  display: flex; gap: 6px; align-items: center;
+  max-width: 60vw;
+}
+.visitor-stats .stat-item { white-space: nowrap; }
+.visitor-stats .stat-label { color: var(--fg-mute); margin-right: 2px; }
+.visitor-stats .stat-value {
+  color: var(--accent); font-weight: 600;
+  font-variant: normal; letter-spacing: 0.02em;
+}
+.visitor-stats .stat-sep { color: var(--fg-mute); opacity: 0.6; }
+/* ============= 导航控件 (v3.6: 居中 + 无边框 + 无标签) ============= */
+.nav-controls {
+  max-width: 800px; margin: 0 auto 18px;
+  display: flex; justify-content: center; align-items: center;
+  padding: 4px 10px; background: transparent;
+  border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 8pt; gap: 24px;
+}
+.nav-controls a, .nav-controls select {
+  color: var(--fg-mute); text-decoration: none;
+  font-family: inherit; font-size: 8pt;
+  padding: 2px 6px; border: none;
+  background: transparent;
+  cursor: pointer; transition: color 0.3s ease;
+}
+.nav-controls a:hover, .nav-controls select:hover {
+  color: var(--accent);
+}
+.nav-controls .nav-prev, .nav-controls .nav-next {
+  font-variant: small-caps; letter-spacing: 0.08em;
+  text-align: center;
+}
+.nav-controls .nav-prev::before { content: "← "; opacity: 0.6; }
+.nav-controls .nav-next::after { content: " →"; opacity: 0.6; }
+.nav-controls .nav-chapter {
+  font-variant: small-caps; letter-spacing: 0.06em;
+}
+.nav-controls .nav-chapter select {
+  color: var(--fg-mute); font-variant: small-caps; letter-spacing: 0.06em;
+}
+
+/* ============= 报头 ============= */
+.masthead { text-align: center; padding-bottom: 10px; margin-top: 12px; }
+/* v17: 顶部一行三栏对称 grid (报头名居中, 控件组靠右, 左右 1fr 自动平衡) */
+.masthead-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 4px;
+  margin-bottom: 2px;
+}
+.masthead-top .journal-name { grid-column: 2; justify-self: center; }
+.masthead-controls {
+  grid-column: 3; justify-self: end;
+  display: flex; align-items: center; gap: 12px;
+}
+/* v17: 窄屏适配 — 写在基础规则之后确保生效; 隐藏统计标签压缩宽度, 保持报头名居中 */
+@media (max-width: 720px) {
+  .masthead-top { padding: 0 2px; }
+  .masthead-controls { gap: 8px; }
+  .visitor-stats { font-size: 7pt; gap: 4px; }
+  .visitor-stats .stat-label { display: none; }
+  .theme-toggle { padding: 2px 6px; }
+}
+.masthead .journal-name {
+  font-size: 8pt; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--fg); font-variant: small-caps; font-weight: 600;
+}
+.masthead .rule-black { height: 1px; background: var(--rule); margin: 8px 0 3px; }
+.masthead .rule-red { height: 1px; background: var(--accent); margin: 0 0 14px; }
+.masthead h1.title {
+  font-size: 22pt; font-weight: 700; line-height: 1.18;
+  letter-spacing: 0.005em; margin: 0 0 4px;
+}
+.masthead .doi {
+  font-size: 8pt; color: var(--fg-mute);
+  font-family: "SF Mono", "Courier New", monospace; margin-bottom: 8px;
+}
+.masthead .rule-bottom { height: 1px; background: var(--rule); margin-top: 8px; }
+
+/* 底部导航 */
+.nav-bottom { margin-top: 28px; }
+
+/* ============= 章节标题 (v3.7: 统一 H2 + doi 内联) ============= */
+.section-heading { max-width: 700px; margin: 0 auto 8px; text-align: center; }
+.section-heading h2 {
+  font-size: 11pt; font-variant: small-caps; letter-spacing: 0.18em;
+  font-weight: 700; border-bottom: 1px solid var(--rule-soft);
+  padding: 0 0 6px; margin: 0;
+}
+.section-heading .doi {
+  font-size: 7.5pt; font-variant: normal; letter-spacing: 0.04em;
+  font-weight: 400; color: var(--fg-mute);
+  font-family: "SF Mono", "Courier New", monospace;
+  margin-left: 12px;
+}
+
+/* ============= 单列正文 =============
+   v3.7+5: 改 text-align: justify → left (用户反馈: 换行后词间距被拉大, 难看)
+   v3.7+5: 取消 text-indent (与其他段缩进差异造成错位感)
+   v3.7+6: text-align: left !important 强制覆盖, 解决部分段落仍 justify 的问题
+   v3.7+5: line-height 1.85 保持行高舒适 */
+.two-col {
+  max-width: 660px; margin: 0 auto;
+  text-align: left !important;  /* v3.7+6: !important 强制 (某些浏览器 fallback 到 justify) */
+  margin-top: 18px;
+  font-size: 12pt; line-height: 1.85;
+  hyphens: none; -webkit-hyphens: none;
+}
+.two-col p {
+  position: relative;
+  margin: 0 0 0.85em;
+  font-size: 12pt; line-height: 1.85;
+  text-align: left !important;  /* v3.7+6: !important */
+}
+.two-col p.no-indent { text-indent: 0; }
+.two-col em { text-align: left; display: inline; }  /* v3.7+6: em 显式 left */
+.sec-num {
+  position: absolute; top: 0.2em; right: 100%; margin-right: 0.6em;
+  font-weight: 700; color: var(--accent); font-size: 7.5pt; vertical-align: super;
+  font-variant: small-caps; letter-spacing: 0.04em;
+}
+
+/* ============= 实体标注 (v3.3: 极轻标记) =============
+   v3.3 变化:
+   - 无视觉标记 (无异色下划线/角标)
+   - hover 时显示 tooltip
+   - 仅靠 cursor: help 提示可交互
+   ============= */
+/* v3.7+3: display:inline-block 确保绝对定位子元素 (.tip) 有可预测的矩形包含块.
+   纯 inline 元素 + position:relative 的包含块在浏览器间不一致,
+   导致 left:50% / bottom 百分比计算结果不可靠 (悬浮注释横向/纵向错位的根因).
+   v3.7+5 尝试: vertical-align: text-top → 过度修复, 导致词上下错位 (v3.7+7 复盘)
+   v3.7+7 根绝修复: 回到 vertical-align: baseline (与周围文字基线一致)
+     + line-height: 1.85 (与 .two-col p 一致, 避免 inline-block 内文与外文基线错位)
+   v3.7+9 根绝修复: 取消所有负 margin (margin: 0)
+     - v3.7+6 ~ +8 反复试探 -0.25em 负 margin, 造成 "Iūlia? 中 ? 紧贴 Iūlia"
+       与 "Syria, Iūlia 中 , 紧贴 Iūlia" 两类标点重叠问题
+     - 根因: HTML 缩进产生的空格节点与前后标点混淆, 负 margin 统一拉近, 错伤了标点
+     - 现在: HTML 写法紧凑 ( <span> 紧跟词, 取消多余缩进), 完全交浏览器默认间距
+   注: 之前 v3.7+5 的 "text-top" 对齐到文字顶, 实际是 9pt cap-height 顶部, 而行高 22.2pt
+   中还有 ascender 区域, 使 inline-block 顶高于周围文字中线, 看起来错位 */
+.ent {
+  position: relative; cursor: help;
+  display: inline-block; vertical-align: baseline;  /* v3.7+7: 回到 baseline */
+  line-height: 1.85;  /* v3.7+7: 保留父级 1.85 行高 (与 .two-col p 一致), 避免内文错位 */
+  margin: 0;  /* v3.7+9: 取消所有负 margin, 信任浏览器默认间距 */
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.ent:hover, .ent:focus, .ent.tapped {
+  background: var(--accent-soft);
+  border-radius: 2px;
+}
+
+/* 实体 tooltip 卡片 (v3.7: display:none 根绝泄漏)
+   v3.7+2 M3: 改为居中对齐 (left:50% + translateX(-50%)).
+   v3.7+3: bottom:100% + margin-bottom 替代 135% 百分比 (依赖 inline-block 明确盒高). */
+.ent .tip {
+  display: none;
+  position: absolute;
+  bottom: 100%; margin-bottom: 8px;  /* v3.7+3: .tip 底边贴 .ent 顶边, 8px 呼吸空间 */
+  left: 50%; transform: translateX(-50%);  /* 居中于 .ent (现为 inline-block, 盒宽明确) */
+  background: var(--tip-bg-light); color: var(--tip-fg-light);
+  font-family: Georgia, serif; font-style: normal; font-variant: normal;
+  font-size: 9pt; line-height: 1.4; padding: 6px 10px; border-radius: 2px;
+  z-index: 100; pointer-events: none;
+  box-shadow: var(--shadow);
+  min-width: 180px; max-width: 240px; white-space: normal;  /* v3.7+2: 280→240 减宽 */
+}
+.ent .tip::after {
+  content: ""; position: absolute;
+  top: 100%; left: 50%; transform: translateX(-50%);  /* 箭头居中于 tooltip 底边 */
+  border: 4px solid transparent; border-top-color: var(--tip-bg-light);
+}
+.ent:hover .tip, .ent:focus .tip, .ent.tapped .tip { display: block; }
+
+[data-theme="dark"] .ent .tip {
+  background: var(--tip-bg); color: var(--tip-fg);
+}
+[data-theme="dark"] .ent .tip::after {
+  border-top-color: var(--tip-bg);
+}
+
+@media (max-width: 720px) {
+  .ent .tip { display: none; }
+  .ent.tapped .tip { display: block; visibility: visible; opacity: 1; }
+}
+
+/* ============= 边注标注 (.margin) v3.7+4 优化 =============
+   v3.7+4 关键变更:
+   - † 符号改为小圆点角标 (●), 更紧凑, 不遮挡行距
+   - .margin 不再独立成段, 必须嵌入正文行内, 紧跟被标注词之后
+   - .q (触发词) 改为可见 (不再是 clip 隐藏), 作为行内文本显示
+   - ::after 渲染小圆点角标 (替代原 ::before 的 †)
+   - v3.7+3 的 display:inline-block 保留 (确保 .tip 包含块可预测)
+
+   设计依据 (CRAP):
+   - Proximity: 角标紧跟被标注词, 物理距离最近 → 归属感强
+   - Contrast: 酒红色小圆点 vs 黑色正文, 对比明显
+   - Repetition: 所有边注角标样式一致
+   - Alignment: 角标垂直对齐到 super 位置, 不干扰正文基线
+   ============= */
+/* v3.7+4: .margin 触发器
+   - display:inline-block 确保绝对定位子元素 (.tip) 有可预测的矩形包含块
+   - .q 可见, 显示被标注词 (如 "vocābulum Graecum")
+   - ::after 渲染酒红色小圆点角标, 紧跟 .q 之后
+   v3.7+7: 同样从 text-top 回到 baseline (避免上下错位), line-height: 1.85 */
+.margin {
+  position: relative; cursor: help;
+  display: inline-block; vertical-align: baseline;  /* v3.7+7: 回到 baseline */
+  line-height: 1.85;  /* v3.7+7: 保留父级 1.85 行高 */
+  padding: 0; margin: 0;  /* v3.7+9: 取消所有负 margin */
+  transition: background 0.3s ease;
+}
+/* v3.7+4: .q 可见 — 显示被标注的词语本身, 作为行内文本
+   v3.7+8: 取消 color: var(--accent-2) (用户反馈: 有悬浮注释的单词与其他正文一个颜色) */
+.margin .q {
+  display: inline;
+  font-style: italic;
+  /* color: inherit (默认), 与正文同色 */
+}
+/* v3.7+4: 小圆点角标 — 紧跟 .q 词后, 酒红色, 不遮挡行距
+   - content: "●" 替代原 † (更紧凑, 不占行高)
+   - font-size: 0.5em (比 † 的 0.7em 更小)
+   - margin-left: 1px (与 .q 词尾保持极小间距) */
+.margin::after {
+  content: "●";
+  font-size: 0.5em;
+  vertical-align: super;
+  line-height: 1;
+  color: var(--accent);
+  font-weight: 700;
+  margin-left: 1px;
+  transition: color 0.3s ease;
+}
+.margin:hover, .margin:focus, .margin.tapped {
+  background: var(--accent-soft);
+  border-radius: 2px;
+}
+.margin:hover::after, .margin:focus::after, .margin.tapped::after {
+  color: var(--accent-2);  /* hover 时变暗酒红 */
+}
+.margin .tip {
+  display: none;
+  position: absolute;
+  bottom: 100%; margin-bottom: 8px;
+  left: 50%; transform: translateX(-50%);
+  background: var(--tip-bg-light); color: var(--tip-fg-light);
+  font-family: Georgia, serif; font-style: normal; font-variant: normal;
+  font-size: 9pt; line-height: 1.5; padding: 10px 14px; border-radius: 2px;
+  z-index: 100; pointer-events: none;
+  box-shadow: var(--shadow);
+  border-left: 3px solid var(--accent);
+  min-width: 260px; max-width: 360px; white-space: normal;
+}
+.margin .tip::after {
+  content: ""; position: absolute;
+  top: 100%; left: 50%; transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: var(--tip-bg-light);
+}
+.margin .tip code {
+  background: transparent;
+  padding: 0 2px; border-radius: 2px;
+  font-family: Georgia, serif; font-style: italic;
+  font-size: 9pt; color: var(--accent-2);
+}
+.margin .tip em {
+  font-style: italic; color: var(--fg);
+}
+.margin:hover .tip, .margin:focus .tip, .margin.tapped .tip { display: block; }
+
+[data-theme="dark"] .margin .tip {
+  background: var(--tip-bg); color: var(--tip-fg);
+}
+[data-theme="dark"] .margin .tip::after {
+  border-top-color: var(--tip-bg);
+}
+[data-theme="dark"] .margin .tip code {
+  background: rgba(255,255,255,0.1);
+  color: var(--accent);
+}
+@media (max-width: 720px) {
+  .margin .tip { display: none; }
+  .margin.tapped .tip { display: block; visibility: visible; opacity: 1; }
+}
+
+/* 统一 tip-key 样式 (实体 + 边注共用) */
+.tip .tip-key {
+  font-variant: small-caps; letter-spacing: 0.1em;
+  color: var(--accent); font-weight: 700; font-size: 8pt;
+  display: block; margin-bottom: 3px;
+  border-bottom: 1px solid var(--rule-soft); padding-bottom: 3px;
+}
+.tip .tip-lat { display: block; }
+
+/* v3.7: tooltip 内多类型排版 (词性/变格两列对齐)
+   - 使用 inline-grid: 元素本身是 inline, 内部仍是 grid 行为
+   - 因为 <span class="tip"> 是 inline 元素, 内部不能再嵌 <div>,
+     改用 <span class="tip-grid"> 配 inline-grid 才符合 HTML5 解析规范
+     (v3.7 修正: grid→inline-grid 防止 tip-grid 跳出 .tip 容器) */
+.tip .tip-grid {
+  display: inline-grid;
+  grid-template-columns: max-content 1fr;
+  gap: 1px 10px;
+  margin: 2px 0 0;
+  vertical-align: top;
+}
+.tip .tip-grid .tip-key {
+  font-variant: small-caps; letter-spacing: 0.08em;
+  color: var(--fg-mute); font-weight: 600; font-size: 7.5pt;
+  display: block; margin: 0; padding: 0;
+  border-bottom: none;  /* 网格行内不画分隔线 */
+}
+.tip .tip-grid code {
+  background: transparent; padding: 0;
+  font-style: italic;
+}
+
+/* ============= Grammatica 板块 (v3.5: 透明底色 + A/B 规则表格化) ============= */
+.grammatica {
+  max-width: 660px; margin: 28px auto; padding: 20px 0;
+  background: transparent; border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10pt; line-height: 1.6;
+  transition: background 0.35s ease;
+}
+.grammatica .gram-heading {
+  font-size: 11pt; font-variant: small-caps; letter-spacing: 0.18em;
+  font-weight: 700; color: var(--fg); margin-bottom: 14px;
+  text-align: center; padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.grammatica .gram-rule {
+  margin-bottom: 16px;
+}
+.grammatica .gram-rule-title {
+  font-size: 10pt; font-weight: 700; font-variant: small-caps;
+  letter-spacing: 0.08em; color: var(--accent); margin-bottom: 4px;
+}
+.grammatica .gram-rule-intro {
+  font-size: 12pt; line-height: 1.85; color: var(--fg-soft);
+  text-align: justify; margin-bottom: 4px;
+}
+.grammatica .gram-rule-body {
+  font-size: 12pt; line-height: 1.85; color: var(--fg-soft);
+  text-align: justify;
+}
+.grammatica .gram-rule-body code {
+  background: var(--bg-card); padding: 1px 4px; border-radius: 2px;
+  font-family: Georgia, serif; font-style: italic;
+}
+.grammatica .gram-rule-body em {
+  font-style: italic; color: var(--fg);
+}
+
+/* 边注 inline 列表 (在 grammatica 内) */
+.grammatica .gram-margin-list {
+  list-style: none; padding: 0; margin: 8px 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+}
+.grammatica .gram-margin-list li {
+  font-size: 8.5pt; color: var(--fg-soft);
+  padding: 2px 0;
+}
+.grammatica .gram-margin-list li strong {
+  color: var(--accent); font-weight: 600; font-variant: small-caps;
+  margin-right: 4px;
+}
+
+/* v3.7: 语法表格 = 说明性文字 (8.5pt), 与正文 10pt 形成 1.5pt 对比 */
+.grammatica .gram-table {
+  width: 100%; border-collapse: collapse;
+  margin: 8px 0 4px; font-size: 8.5pt; line-height: 1.45;
+  /* 无外框, 无竖线, 仅表头下方一条 1px 细线 */
+}
+.grammatica .gram-table thead th {
+  text-align: left;
+  font-variant: small-caps; letter-spacing: 0.08em;
+  font-weight: 600; font-size: 7.5pt;
+  color: var(--fg-mute);
+  padding: 3px 6px 4px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-top: none; border-left: none; border-right: none;
+}
+.grammatica .gram-table tbody td {
+  padding: 2px 6px;
+  border: none;  /* 单元格无线 */
+  vertical-align: top;
+  color: var(--fg-soft);
+}
+.grammatica .gram-table tbody tr:last-child td {
+  padding-bottom: 6px;
+}
+.grammatica .gram-table code {
+  background: transparent; padding: 0;
+  font-family: Georgia, serif; font-style: italic;
+  font-size: 8.5pt; color: var(--fg);
+}
+.grammatica .gram-table .col-decl,
+.grammatica .gram-table .col-gen {
+  white-space: nowrap;
+  font-variant: small-caps; letter-spacing: 0.04em;
+  color: var(--accent); font-size: 7.5pt;
+}
+
+/* v3.7+1: 语法示例 grid (D/E 规则内 6 code + 5 in+abl)
+   - 把密集逗号分隔的代码示例拆分为可扫描的网格
+   - 提高可读性 (CRAP: Proximity — 视觉上把同组示例聚成一个单元)
+   - v3.7+1: 取消 li 的 accent-soft 底色 (用户要求), 仅以 0.5px
+     border-soft 描边 + 居中排版作为分组暗示, 与正文 12pt 形成层次 */
+.grammatica .gram-examples {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 8px;
+  margin: 6px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+.grammatica .gram-examples.cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+.grammatica .gram-examples li {
+  /* v3.7+1: 无背景色, 仅 0.5px 细线暗示分组 */
+  background: transparent;
+  border: 0.5px solid var(--rule-soft);
+  border-radius: 1px;
+  padding: 3px 6px;
+  text-align: center;
+  font-size: 9pt;
+  line-height: 1.35;
+  color: var(--fg-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.grammatica .gram-examples li code {
+  background: transparent;
+  padding: 0;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 9pt;
+  color: var(--fg);
+}
+
+/* ============= 拓展卡 (.ll-ext-block) (v3.7: 奇偶交替底色 + 对齐正文 660px) ============= */
+.ll-ext-block {
+  padding: 14px 0; background: transparent;
+  max-width: 660px; margin: 24px auto;
+  border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+}
+.ll-ext-heading {
+  font-size: 11pt; font-variant: small-caps; letter-spacing: 0.18em;
+  color: var(--fg); font-weight: 700; margin-bottom: 12px;
+  text-align: center; padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.ll-ext-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px; text-align: left; font-style: normal;
+}
+.ll-ext-card {
+  background: var(--bg-card); border: none;
+  padding: 6px 8px; font-size: 8pt; line-height: 1.4;
+  display: flex; flex-direction: column; gap: 2px;
+  transition: background 0.2s ease;
+}
+/* 未展开前只留必要信息: 书名+匹配度 */
+.ll-ext-preview, .ll-ext-meta { display: none; }
+/* v3.7: 取消奇偶交替底色, 全部统一为 var(--bg-card) (用户要求) */
+.ll-ext-card:hover {
+  background: var(--accent-soft);
+}
+.ll-ext-head { display: flex; justify-content: space-between; gap: 4px; align-items: baseline; }
+.ll-ext-score {
+  background: transparent; color: var(--accent);
+  font-size: 6.5pt; padding: 0; font-variant: small-caps; flex-shrink: 0;
+}
+.ll-ext-book {
+  font-weight: 700; font-size: 8pt; line-height: 1.2;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  width: 100%;  /* v3.7: 满宽, 与 full-body 右边缘对齐 */
+  text-align: left;
+}
+.ll-ext-preview {
+  color: var(--fg-soft); line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; font-size: 7.5pt;
+}
+.ll-ext-meta { color: var(--fg-mute); font-size: 7pt; font-variant: small-caps; }
+.ll-ext-meta code { background: var(--bg-soft); padding: 0 3px; border-radius: 2px; font-size: 7pt; }
+.ll-ext-toggle { margin-top: 2px; }
+.ll-ext-toggle summary {
+  cursor: pointer; font-size: 7pt; color: var(--accent);
+  font-variant: small-caps; letter-spacing: 0.04em;
+}
+/* v3.7: full-body 去掉左右 padding (由 .ll-ext-card 承担),
+   保证书名 (.ll-ext-book) 与正文 (.ll-ext-full-body) 左/右边缘完全对齐 */
+.ll-ext-full-body {
+  margin-top: 4px; padding: 6px 0; background: var(--accent-soft);
+  font-style: normal; font-size: 8pt; line-height: 1.5;
+  max-height: 200px; overflow-y: auto;
+  text-align: left;
+}
+
+/* ============= 底部 Colophon ============= */
+.colophon { margin-top: 28px; padding-top: 6px; border-top: 1px solid var(--rule); }
+.colophon .rule-red { height: 1px; background: var(--accent); margin-top: 2px; }
+.colophon p {
+  text-align: center; font-size: 7.5pt; color: var(--fg-mute);
+  letter-spacing: 0.06em; font-variant: small-caps; padding-top: 6px;
+}
+
+/* ============= 响应式 ============= */
+@media (max-width: 720px) {
+  .masthead h1.title { font-size: 17pt; }
+  .two-col { font-size: 11pt; }
+  .two-col p { font-size: 11pt; }
+  .theme-toggle { font-size: 7.5pt; padding: 4px 8px; }
+  .nav-controls { flex-wrap: wrap; font-size: 8pt; padding: 6px 10px; }
+  .nav-controls .nav-chapter { flex: 1 1 100%; order: 3; }
+  .ll-ext-grid { grid-template-columns: 1fr; }
+  .grammatica .gram-margin-list { grid-template-columns: 1fr; }
+  .grammatica .gram-examples { grid-template-columns: repeat(2, 1fr); }
+  .grammatica .gram-examples.cols-5 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 480px) {
+  body { padding: 18px 12px 28px; }
+  .masthead h1.title { font-size: 15pt; }
+}
+
+/* ============= 打印 ============= */
+@media print {
+  .theme-toggle, .nav-controls { display: none; }
+  .ent .tip, .margin .tip { display: none !important; }
+  .ll-ext-block, .grammatica { page-break-before: always; }
+  body { background: #fff; color: #000; }
+  .ll-ext-block, .grammatica, .colophon { page-break-inside: avoid; }
+}
+
+/* =============================================================
+   M3 拓展读物矩阵 (feat/reader-pivot 2026-06-12)
+   沿用 M2 §10 拓展卡 (.ll-ext-block) 基础, 新增按章分组
+   ============================================================= */
+
+/* M3.1 拓展块标题 */
+.ll-ext-block > .ll-ext-heading {
+  max-width: 660px; margin: 18px auto 8px;
+  padding: 0 0 6px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-variant: small-caps; letter-spacing: 0.08em;
+  font-size: 9pt; font-weight: 400;
+  color: var(--accent);
+  text-align: center;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+/* M3.2 按章分组 (.ll-ext-group) */
+.ll-ext-block .ll-ext-group {
+  max-width: 660px; margin: 0 auto 16px;
+  padding: 0;
+}
+.ll-ext-block .ll-ext-group-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 4px 0;
+  margin-bottom: 6px;
+  border-bottom: 0.5px dashed var(--rule-soft);
+}
+.ll-ext-block .ll-ext-group-num {
+  font-family: Georgia, serif;
+  font-variant: small-caps; letter-spacing: 0.06em;
+  font-size: 9pt; color: var(--accent);
+  font-weight: 700;
+}
+.ll-ext-block .ll-ext-group-title {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 9pt; color: var(--fg-soft);
+}
+
+/* M3.3 卡片网格 (沿用 .ll-ext-grid, 4 列) */
+.ll-ext-block .ll-ext-group .ll-ext-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px 6px;
+}
+
+/* M3.4 卡片 active 态 (当前页面对应的卡片) */
+.ll-ext-card {
+  text-decoration: none; color: inherit;
+  /* 沿用 M2 v3.7+1 样式: 统一 var(--bg-card), 0.5px 边框, hover accent-soft */
+}
+.ll-ext-card.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.ll-ext-card.active .ll-ext-book,
+.ll-ext-card.active .ll-ext-preview,
+.ll-ext-card.active .ll-ext-meta {
+  color: #fff;
+}
+[data-theme="dark"] .ll-ext-card.active {
+  background: var(--accent);
+  color: var(--bg);
+}
+[data-theme="dark"] .ll-ext-card.active .ll-ext-book,
+[data-theme="dark"] .ll-ext-card.active .ll-ext-preview,
+[data-theme="dark"] .ll-ext-card.active .ll-ext-meta {
+  color: var(--bg);
+}
+
+/* M3.5 样本提示框 (灰色边框 + 米黄底) */
+.sample-notice {
+  max-width: 660px; margin: 14px auto;
+  padding: 10px 14px;
+  background: #fff7e6;
+  border-left: 3px solid #d4a017;
+  border-radius: 2px;
+  font-family: Georgia, serif;
+  font-size: 8.5pt; line-height: 1.5;
+  color: #5a4500;
+}
+[data-theme="dark"] .sample-notice {
+  background: #2a2419;
+  color: #d4c79a;
+  border-left-color: #b8902a;
+}
+.sample-notice code {
+  background: rgba(0,0,0,0.06);
+  padding: 1px 4px;
+  border-radius: 1px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 8.5pt;
+}
+
+/* M3 响应式: 卡片网格降到 2 列 */
+@media (max-width: 720px) {
+  .ll-ext-block .ll-ext-group .ll-ext-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ll-ext-block .ll-ext-group-head {
+    flex-wrap: wrap; gap: 4px;
+  }
+}
+@media (max-width: 480px) {
+  .ll-ext-block .ll-ext-group .ll-ext-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* v3.7+10: 展开/折叠按钮 (默认折叠, 隐藏次要拓展读物)
+   - 用 <details>/<summary> 原生支持, 零 JS
+   - 折叠时显示 ▸, 展开时显示 ▾ (CSS [open] 选择器)
+   - 次要卡片 .ll-ext-card--more 用 var(--bg-soft) 弱化, 与核心 4 张区分 */
+.ll-ext-more { margin-top: 8px; }
+.ll-ext-more-toggle {
+  cursor: pointer; list-style: none;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 7.5pt; color: var(--accent);
+  font-variant: small-caps; letter-spacing: 0.06em;
+  padding: 4px 6px; border-radius: 2px;
+  user-select: none;
+}
+.ll-ext-more-toggle:hover { background: var(--accent-soft); }
+.ll-ext-more-toggle::-webkit-details-marker { display: none; }
+.ll-ext-more-icon { font-size: 9pt; transition: transform 0.15s; display: inline-block; }
+.ll-ext-more[open] .ll-ext-more-icon { transform: rotate(90deg); }
+.ll-ext-more[open] .ll-ext-more-toggle { color: var(--fg); }
+.ll-ext-grid--more { margin-top: 8px; }
+.ll-ext-card--more {
+  background: var(--bg-soft);
+  opacity: 0.85;
+}
+.ll-ext-card--more:hover { opacity: 1; background: var(--accent-soft); }
+
+[data-theme="dark"] .ll-ext-card--more { background: var(--bg-card); }
+
+/* ============================================================
+   Bibliothēca · 目录页 (index.html) 专属样式
+   ------------------------------------------------------------
+   复用 M3 ll-ext-* 类体系 (ll-ext-block / ll-ext-group / ll-ext-grid / ll-ext-card),
+   但通过 #matrix-block 作用域覆盖宽度和布局:
+   - 目录页更宽 (1100px) 以容纳多列卡片
+   - 卡片网格使用 auto-fill 自适应 (复用 template reader.html 的卡片网格)
+   - 覆盖 M2/M3 中 ll-ext-preview 的 display:none 为可见
+   - 卡片添加边框以增强可点击反馈
+
+   主题适配: 全部使用 CSS 变量, 无硬编码颜色.
+   ============================================================ */
+
+/* ============= 目录页: masthead 副标题 ============= */
+.masthead .subtitle {
+  font-size: 9pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.14em;
+  margin-top: 2px;
+}
+
+/* v15: 惰性渲染底部哨兵 (1px 占位, IntersectionObserver 观察) */
+.lazy-sentinel { height: 1px; }
+
+/* ============= v14: 章节索引条 .chapter-index =============
+   顶部 sticky 横向滚动, 全 LLPSI 章节 (Cap. I-LVI + sine Not\u0101) */
+.chapter-index {
+  position: sticky; top: 0; z-index: 60;
+  max-width: 1100px; margin: 0 auto 12px;
+  padding: 6px 8px;
+  display: flex; gap: 4px; overflow-x: auto;
+  background: var(--bg); border-bottom: 1px solid var(--rule-soft);
+  scrollbar-width: thin;
+}
+.chapter-index .ci-item {
+  flex: 0 0 auto;
+  background: transparent; border: 1px solid var(--rule-soft);
+  color: var(--fg-mute);
+  font-family: inherit; font-size: 7.5pt;
+  font-variant: small-caps; letter-spacing: 0.04em;
+  padding: 2px 8px; cursor: pointer; border-radius: 2px;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.chapter-index .ci-item:hover {
+  color: var(--accent); border-color: var(--accent);
+}
+.chapter-index .ci-item.active {
+  color: var(--accent); border-color: var(--accent);
+  background: var(--accent-soft); font-weight: 700;
+}
+@media (max-width: 720px) {
+  .chapter-index { font-size: 7pt; padding: 4px 6px; }
+}
+
+/* ============= 目录页: 筛选栏 .filter-bar =============
+   风格: 上下细线 + flex 布局, 与 main_template nav-controls 一致 */
+.filter-bar {
+  max-width: 1100px; margin: 0 auto 24px;
+  padding: 10px 16px;
+  display: flex; flex-direction: column;  /* v16: 纵向, 每维度一行 */
+  gap: 12px;
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  background: transparent;
+  font-size: 9pt;
+}
+.filter-group {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.filter-group .filter-label {
+  font-size: 7.5pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  cursor: pointer; user-select: none;  /* v16: 点击标题折叠/展开 */
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.filter-group .filter-label::before {
+  content: "▾"; font-size: 7pt; opacity: 0.7;  /* 展开指示 */
+  transition: transform 0.2s ease;
+}
+.filter-group.collapsed .filter-label::before { content: "▸"; }
+.filter-group.collapsed .filter-options { display: none; }
+.filter-group label {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--fg-soft); cursor: pointer;
+  font-size: 9pt; line-height: 1.6;
+  transition: color 0.2s ease;
+}
+.filter-group label:hover { color: var(--accent); }
+.filter-group input[type="checkbox"] {
+  margin: 0; cursor: pointer;
+  accent-color: var(--accent);
+}
+#select-all {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--rule-soft);
+  color: var(--fg-soft);
+  padding: 4px 12px;
+  font-family: inherit; font-size: 8pt;
+  font-variant: small-caps; letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+#select-all:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ============= 目录页: #matrix-block 容器 =============
+   覆盖 M2/M3 的 .ll-ext-block 样式 (660px → 1100px, 适应目录页) */
+#matrix-block {
+  max-width: 1100px; margin: 0 auto;
+  min-height: 200px;
+}
+#matrix-block .ll-ext-block {
+  max-width: 100%; margin: 0 0 28px;
+  padding: 0 0 14px;
+  border-top: none; border-bottom: 1px solid var(--rule-soft);
+}
+#matrix-block .ll-ext-heading {
+  max-width: 100%; margin: 0 0 12px;
+  padding: 0 0 8px;
+  font-size: 12pt; font-weight: 700;
+  color: var(--fg);
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+  font-variant: small-caps; letter-spacing: 0.12em;
+}
+
+/* 章节分组: 覆盖 M3 的 660px → 100% */
+#matrix-block .ll-ext-group {
+  max-width: 100%; margin: 0 0 14px;
+}
+#matrix-block .ll-ext-group-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 4px 0; margin-bottom: 6px;
+  border-bottom: 0.5px dashed var(--rule-soft);
+}
+#matrix-block .ll-ext-group-num {
+  font-size: 9pt; color: var(--accent); font-weight: 700;
+  font-variant: small-caps; letter-spacing: 0.06em;
+}
+#matrix-block .ll-ext-group-count {
+  font-size: 7.5pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.04em;
+  margin-left: auto;
+}
+
+/* 卡片网格: 覆盖 M3 的 4 列 → auto-fill 自适应 */
+#matrix-block .ll-ext-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+/* 卡片: 覆盖 M2 的 border:none → 添加浅边框 */
+#matrix-block .ll-ext-card {
+  background: var(--bg-card);
+  border: 1px solid var(--rule-soft);
+  border-radius: 2px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  display: flex; flex-direction: column; gap: 4px;
+  outline: none;
+}
+#matrix-block .ll-ext-card:hover,
+#matrix-block .ll-ext-card:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+#matrix-block .ll-ext-card:active {
+  transform: scale(0.99);
+}
+
+/* 卡片头部: 难度标签左, 词数右 */
+#matrix-block .ll-ext-head {
+  display: flex; justify-content: space-between; gap: 4px; align-items: baseline;
+  margin-bottom: 2px;
+}
+#matrix-block .ll-ext-score {
+  font-size: 7pt; color: var(--accent);
+  font-variant: small-caps; letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+#matrix-block .ll-ext-words {
+  font-size: 7pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+/* 卡片标题 (section): 覆盖 M2 的 .ll-ext-section 增强 */
+#matrix-block .ll-ext-section {
+  font-size: 10pt; font-weight: 700; color: var(--fg);
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* 卡片预览: 覆盖 M2 的 display:none → 显示 */
+#matrix-block .ll-ext-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 7.5pt; color: var(--fg-soft);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+/* ============= 状态文本: loading / empty / error ============= */
+#matrix-block .loading,
+#matrix-block .empty,
+#matrix-block .error {
+  text-align: center;
+  color: var(--fg-mute);
+  font-size: 10pt;
+  font-style: italic;
+  padding: 40px 0;
+}
+#matrix-block .error { color: var(--accent); }
+
+/* ============= 阅读页: 返回按钮栏 .back-bar (v6 拆分) =============
+   v6: 从原 .reader-nav 拆出, 独立 sticky 顶部; 元信息栏改普通 flow 不 sticky
+   布局: sticky, 顶部, 仅含返回按钮; 用户决策 (问题 4 选项 A) */
+.back-bar {
+  position: sticky; top: 0; z-index: 50;
+  max-width: 900px; margin: 0 auto;
+  padding: 6px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: 8.5pt;
+}
+.back-bar .back-button {
+  color: var(--accent);
+  text-decoration: none;
+  font-variant: small-caps; letter-spacing: 0.08em;
+  font-size: 8.5pt;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.back-bar .back-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* ============= 阅读页: 元信息栏 .reader-nav (v6 重构) =============
+   v6: 取消 sticky, 透明背景, 仅底部细线; 用户决策 (问题 4 选项 B)
+   原 sticky+nav-bg 改为透明+底部细线, 削弱存在感 */
+.reader-nav {
+  max-width: 900px; margin: 0 auto;
+  padding: 8px 16px;
+  background: transparent;
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: 8.5pt;
+}
+.reader-nav .info-bar {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  color: var(--fg-mute);
+  font-size: 8pt;
+  letter-spacing: 0.04em;  /* v6: 移除 font-variant: small-caps, 与 info-val 字体一致 */
+}
+.reader-nav .info-bar span { white-space: nowrap; }
+
+/* ============= 阅读页: 章节标题区 .segment-header =============
+   居中 + 底部分隔线, 复用 .section-heading 视觉语言 */
+.segment-header {
+  max-width: 660px; margin: 24px auto 16px;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.segment-header h1 {
+  font-size: 18pt; font-weight: 700;
+  color: var(--fg);
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+.segment-header .chapter-title {
+  font-size: 9pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.1em;
+  margin: 0;
+}
+
+/* ============= 阅读页: 正文容器 .segment-content =============
+   max-width 660px 居中, 行高 1.85, 字号 12pt (与 main_template 一致) */
+.segment-content {
+  max-width: 660px; margin: 18px auto 48px;
+  font-size: 12pt; line-height: 1.85;
+  color: var(--fg);
+  text-align: left;
+  hyphens: none; -webkit-hyphens: none;
+}
+.segment-content p {
+  margin: 0 0 0.85em;
+  font-size: 12pt; line-height: 1.85;
+}
+.segment-content p:last-child { margin-bottom: 0; }
+.segment-content .loading,
+.segment-content .error {
+  text-align: center;
+  color: var(--fg-mute);
+  font-style: italic;
+  padding: 40px 0;
+}
+.segment-content .error { color: var(--accent); }
+
+/* ============= 目录页/阅读页: 响应式补丁 ============= */
+@media (max-width: 720px) {
+  #matrix-block .ll-ext-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  #select-all {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+  .reader-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 12px;
+  }
+  .reader-nav .info-bar {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .segment-header h1 { font-size: 15pt; }
+  .segment-content { font-size: 11pt; padding: 0 8px; }
+}
+@media (max-width: 480px) {
+  .segment-content { font-size: 10.5pt; }
+}
+
+/* ============================================================
+   Bibliothēca v3 新增样式 (REBUILD_SPEC_v3)
+   ------------------------------------------------------------
+   1. 筛选栏: filter-options / filter-actions / filter-stats
+   2. 卡片矩阵: heading-count / card-meta / praevisum 按钮 / preview 展开
+   3. 阅读页元信息栏: info-item / info-key / info-val (8 字段)
+   全部使用 CSS 变量, 无硬编码颜色。
+   ============================================================ */
+
+/* ============= 筛选栏: filter-options (checkbox 容器) =============
+   纵向排列 checkbox, 与 filter-label 对齐 */
+.filter-options {
+  display: grid;  /* v16: 多列网格, 告别 70 项纵向挤压 */
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 2px 14px;
+}
+/* v18: Liber 组不再限高滚动 — 截断功能(默认10项+展开按钮)已控制高度,
+   限高滚动只有 book 组有 overflow, 导致 scrollbar-gutter 仅在 book 组预留槽位,
+   四组列宽仍不一致。移除后四组 .filter-options 完全相同, 列宽天然一致 */
+/* v16: 筛选项计数徽章 */
+.filter-count {
+  color: var(--fg-mute); font-size: 8pt; opacity: 0.85;
+}
+@media (max-width: 720px) {
+  .filter-options { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+.filter-options label {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--fg-soft); cursor: pointer;
+  font-size: 8.5pt; line-height: 1.5;
+  transition: color 0.2s ease;
+}
+.filter-options label:hover { color: var(--accent); }
+.filter-options input[type="checkbox"] {
+  margin: 0; cursor: pointer;
+  accent-color: var(--accent);
+}
+
+/* v18: 维度标题悬浮注释 (Fides 可信度说明)
+   data-tip 属性提供拉丁文文本, ::after 纯 CSS 渲染 tooltip
+   位置: 标签右侧空白区 (标签行右侧无内容, 不遮挡复选框) */
+.filter-label { position: relative; }
+/* v23: Fides 问号图标 — 与其他 filter-label 完全一致布局, 问号触发 tooltip
+   内容与阅读页统一 (Crēdibilitās + S/A/B/C/D 说明) */
+.filter-tip-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px;
+  border: 1px solid var(--fg-mute);
+  border-radius: 50%;
+  font-size: 7pt; font-weight: 700;
+  color: var(--fg-mute);
+  cursor: help; user-select: none;
+  margin-left: 2px;
+  position: relative;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.filter-tip-icon:hover, .filter-tip-icon:focus {
+  color: var(--accent); border-color: var(--accent);
+  outline: none;
+}
+.filter-tip-icon .tip {
+  display: none;
+  position: absolute;
+  left: 50%; bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: var(--tip-bg); color: var(--tip-fg);
+  font-family: Georgia, serif; font-style: normal; font-variant: normal;
+  font-size: 8.5pt; line-height: 1.5;
+  text-transform: none; letter-spacing: 0.02em;
+  padding: 8px 12px; border-radius: 2px;
+  z-index: 200; pointer-events: none;
+  box-shadow: var(--shadow);
+  min-width: 280px; max-width: 340px; white-space: normal; text-align: left;
+}
+.filter-tip-icon .tip .tip-key {
+  font-variant: small-caps; letter-spacing: 0.08em;
+  font-size: 7.5pt; color: var(--accent);
+  display: block; margin-bottom: 4px;
+}
+.filter-tip-icon .tip strong {
+  color: var(--accent); font-weight: 700;
+}
+.filter-tip-icon:hover .tip,
+.filter-tip-icon:focus .tip { display: block; }
+[data-theme="dark"] .filter-tip-icon .tip {
+  background: var(--tip-bg); color: var(--tip-fg);
+}
+
+/* v17: 截断显示 — 超出 FILTER_TRUNCATE 的选项默认隐藏, 点击按钮展开 */
+.filter-options .filter-extra { display: inline-flex; }
+.filter-options.filter-truncated .filter-extra { display: none; }
+/* v18: 重设计 — 不再用虚线边框盒 (既不优雅, 作为网格项还会占用列格)。
+   改为独占整行的纯文字链接: 左侧与复选框首列对齐, 小号小型大写, hover 变酒红 */
+.filter-more {
+  grid-column: 1 / -1;   /* 独占整行, 不参与列宽分配 */
+  justify-self: start;   /* 左对齐首列复选框 */
+  background: none;
+  border: none;
+  color: var(--fg-mute);
+  font-family: inherit;
+  font-size: 7.5pt;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  padding: 4px 2px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.filter-more:hover { color: var(--accent); }
+
+/* ============= 筛选栏: filter-actions (按钮组 + 计数) =============
+   v6: margin-left: 0 让按钮与 filter-label 同列起始, 不再推到最右 */
+.filter-actions {
+  margin-left: 0;
+  display: flex; align-items: center; gap: 8px;
+}
+.filter-stats {
+  font-size: 7.5pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+#clear-all {
+  background: transparent;
+  border: 1px solid var(--rule-soft);
+  color: var(--fg-soft);
+  padding: 4px 12px;
+  font-family: inherit; font-size: 8pt;
+  font-variant: small-caps; letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+#clear-all:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ============= 卡片矩阵: 章号组标题 =============
+   .ll-ext-heading 已有样式, 这里补充 heading-count (右侧段落数) */
+#matrix-block .ll-ext-heading {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px;
+}
+#matrix-block .ll-ext-heading-count {
+  font-size: 7.5pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.06em;
+  font-weight: 400;
+}
+
+/* ============= 卡片矩阵: 卡片元信息 =============
+   体裁/时代/可信度, 小字, 用于筛选反馈 */
+#matrix-block .ll-ext-card-meta {
+  font-size: 7pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.04em;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+/* ============= 卡片矩阵: Praevisum 展开/收起按钮 ============= */
+#matrix-block .ll-ext-praevisum {
+  align-self: flex-end;
+  background: transparent;
+  border: 1px solid var(--rule-soft);
+  color: var(--accent);
+  padding: 2px 8px;
+  margin-top: 4px;
+  font-family: inherit; font-size: 7pt;
+  font-variant: small-caps; letter-spacing: 0.06em;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+#matrix-block .ll-ext-praevisum:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+#matrix-block .ll-ext-praevisum:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ============= 卡片矩阵: 预览文本 (展开/收起) =============
+   默认 hidden (HTML attribute), 移除 hidden 后显示
+   用 max-height + opacity 实现平滑展开动画 */
+#matrix-block .ll-ext-preview {
+  font-size: 8pt; color: var(--fg-soft);
+  line-height: 1.4;
+  margin-top: 4px;
+  padding: 6px 8px;
+  background: var(--bg-soft);
+  border-left: 2px solid var(--accent);
+  border-radius: 1px;
+  font-style: italic;
+  /* 动画: 从 0 高度展开 (仅当 hidden 属性被移除时生效) */
+  animation: praevisum-open 0.2s ease-out;
+}
+@keyframes praevisum-open {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============= 阅读页: 元信息栏 8 字段 =============
+   布局: flex wrap, 每项含 key (标签) + val (值)
+   key 用 small-caps 弱化, val 用正常字体 */
+.reader-nav .info-bar {
+  display: flex; flex-wrap: wrap; gap: 4px 16px;
+  align-items: baseline;
+}
+.reader-nav .info-item {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  white-space: nowrap;
+}
+.reader-nav .info-key {
+  font-size: 7pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.reader-nav .info-val {
+  font-size: 8.5pt; color: var(--fg);
+  font-weight: 400;
+  max-width: 200px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.reader-nav .info-val#info-source {
+  color: var(--accent);
+  cursor: help;  /* title 属性显示完整 URL */
+}
+.reader-nav .info-val#info-credibility {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ============= 响应式: 筛选栏 + 元信息栏 ============= */
+@media (max-width: 720px) {
+  .filter-actions {
+    margin-left: 0;
+    align-self: flex-start;
+    flex-wrap: wrap;
+  }
+  .reader-nav .info-bar {
+    gap: 4px 10px;
+  }
+  .reader-nav .info-val {
+    max-width: 120px;
+  }
+}
+@media (max-width: 480px) {
+  .reader-nav .info-bar {
+    flex-direction: column;
+    gap: 2px 0;
+  }
+  .reader-nav .info-item {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   Bibliothēca v4 新增样式 (用户反馈精简版)
+   ------------------------------------------------------------
+   1. 卡片: .ll-ext-book (书名) + .ll-ext-tier (长度标签, 三色变体)
+   2. 阅读页: .info-link (Origo 可点击链接)
+   3. 隐藏 v3 残留的 Praevisum/preview (HTML 已不生成, 保险隐藏)
+   ============================================================ */
+
+/* ============= 卡片: 书名 + 长度标签 ============= */
+#matrix-block .ll-ext-book {
+  font-size: 7pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.04em;
+}
+#matrix-block .ll-ext-tier {
+  font-size: 7pt; font-style: italic;
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 6px;
+  border: 1px solid var(--rule-soft);
+}
+/* 长度标签三色变体 (brevis 绿/medius 橙/longus 红, 用 accent 色系) */
+#matrix-block .ll-ext-tier-brevis  { color: var(--fg-mute); border-color: var(--rule-soft); }
+#matrix-block .ll-ext-tier-medius  { color: var(--accent); border-color: var(--accent); }
+#matrix-block .ll-ext-tier-longus  { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+
+/* ============= 阅读页: Origo 可点击链接 ============= */
+.reader-nav .info-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.reader-nav .info-link:hover {
+  color: var(--fg);
+  text-decoration-style: solid;
+}
+.reader-nav .info-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* 无 href 时 (Origo 为 —) 不显示链接样式 */
+.reader-nav .info-link:not([href]) {
+  color: var(--fg-mute);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* ============= 隐藏 v3 残留 Praevisum/preview (保险, HTML 已不生成) ============= */
+#matrix-block .ll-ext-praevisum,
+#matrix-block .ll-ext-preview {
+  display: none !important;
+}
+
+/* ============================================================
+   Bibliothēca v5 新增样式 (用户反馈优化)
+   ------------------------------------------------------------
+   1. 筛选栏折叠 (<details>/<summary>, 复用 template .ll-ext-more 模式)
+   2. 卡片 length_tier 独立行左对齐
+   3. 元信息栏统一样式 (移除特殊颜色/粗体)
+   4. Fides tooltip (复用 template .ent .tip 样式)
+   5. 移动端响应式优化
+   ============================================================ */
+
+/* ============= 筛选栏: 折叠容器 =============
+   复用 template .ll-ext-more 的 <details>/<summary> 模式
+   默认收起, 点击 summary 展开 */
+.filter-collapsible {
+  max-width: 1100px; margin: 12px auto 8px;
+  padding: 0;
+}
+.filter-summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px;
+  font-size: 8pt; color: var(--accent);
+  font-variant: small-caps; letter-spacing: 0.1em;
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  user-select: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.filter-summary:hover { background: var(--accent-soft); }
+.filter-summary::-webkit-details-marker { display: none; }
+.filter-summary-icon {
+  font-size: 9pt; transition: transform 0.15s;
+  display: inline-block;
+}
+.filter-collapsible[open] .filter-summary-icon { transform: rotate(90deg); }
+.filter-collapsible[open] .filter-summary { color: var(--fg); }
+.filter-summary-text { flex-shrink: 0; }
+/* filter-stats 移到 summary 右侧 */
+.filter-summary .filter-stats {
+  margin-left: auto;
+  font-size: 7.5pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+/* 展开后的筛选栏 */
+.filter-collapsible .filter-bar {
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ============= 卡片: length_tier 长度条样式 (v6: ▭ ▬▬ ▬▬▬) ============= */
+#matrix-block .ll-ext-book {
+  font-size: 7pt; color: var(--fg-mute);
+  font-variant: small-caps; letter-spacing: 0.04em;
+  text-align: left;  /* v5: 左对齐 */
+  margin-top: 2px;
+}
+#matrix-block .ll-ext-tier {
+  text-align: left;  /* v5: 左对齐, 与 book 同列 */
+  padding: 0;  /* v5: 移除边框 padding, 改为纯文本 */
+  border: none;
+  margin-left: 0;  /* v6: 显式重置 v4 残留的 6px, 真正左对齐 */
+  margin-top: 3px;
+  display: flex;  /* v6: flex 布局放长度条 */
+  gap: 2px;  /* v6: 条间间距 */
+  align-items: center;
+}
+/* v8: 长度条 (span.ll-ext-bar)
+   方案 A: 数量递增 (1/2/3 个条), 颜色按 tier 分级
+   brevis = 1 个短条 (空心灰)
+   medius = 2 个中条 (accent 半透明)
+   longus = 3 个长条 (accent 实心加粗) */
+#matrix-block .ll-ext-bar {
+  display: inline-block;
+  width: 8px;
+  height: 4px;
+  margin-right: 2px;
+  border-radius: 1px;
+  vertical-align: middle;
+}
+/* brevis: 1 个条, 实心灰 (v8.1 改: 原空心辨识度低) */
+#matrix-block .ll-ext-tier-brevis .ll-ext-bar {
+  background: var(--fg-mute);
+}
+/* medius: 2 个条, accent 半透明 */
+#matrix-block .ll-ext-tier-medius .ll-ext-bar {
+  background: var(--accent);
+  opacity: 0.7;
+}
+/* longus: 3 个条, accent 实心加粗 */
+#matrix-block .ll-ext-tier-longus .ll-ext-bar {
+  background: var(--accent);
+  height: 5px;
+  opacity: 1;
+}
+
+/* ============= 元信息栏: 统一样式 (v5 移除特殊样式) =============
+   v4 给 Origo/Fides/Longitudo 加了特殊样式, v5 统一为普通 info-val
+   v6: 显式 font-variant: normal, 取消继承的 small-caps, 让值原样显示
+        (brevis 全小写不变全小型大写, Prose 首字母大写保持, 字体真正一致) */
+.reader-nav .info-val {
+  font-size: 8.5pt; color: var(--fg);
+  font-weight: 400;  /* v5: 统一非粗体 */
+  font-variant: normal;  /* v6: 显式取消继承的 small-caps */
+  max-width: 200px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+/* v5: 移除 Origo 的链接特殊样式, 保持与其他字段一致
+      但保留可点击 (href 存在时 cursor pointer + 下划线) */
+.reader-nav .info-val#info-source[href] {
+  color: var(--fg);  /* v5: 与其他字段同色 */
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.reader-nav .info-val#info-source[href]:hover {
+  color: var(--accent);
+}
+.reader-nav .info-val#info-source:not([href]) {
+  color: var(--fg-mute);
+  text-decoration: none;
+  cursor: default;
+}
+/* v5: 移除 v4 给 credibility 的特殊粗体 accent 样式 */
+.reader-nav .info-val#info-credibility {
+  color: var(--fg);
+  font-weight: 400;
+}
+
+/* ============= Fides tooltip (复用 template .ent .tip 样式) =============
+   .ent 提供 cursor:help + hover 背景
+   .tip 提供 absolute 定位 tooltip 卡片 */
+.reader-nav .info-val.ent {
+  position: relative; cursor: help;
+  display: inline-block;
+  overflow: visible;  /* v14: 覆盖 .info-val 的 overflow:hidden, 否则 tooltip 被裁剪 */
+  border-bottom: 1px dotted var(--fg-mute);  /* 暗示可悬浮 */
+}
+.reader-nav .info-val.ent:hover,
+.reader-nav .info-val.ent:focus {
+  background: var(--accent-soft);
+  border-radius: 2px;
+}
+.reader-nav .info-val.ent .tip {
+  display: none;
+  position: absolute;
+  bottom: 100%; margin-bottom: 8px;
+  left: 50%; transform: translateX(-50%);
+  background: var(--tip-bg-light); color: var(--tip-fg-light);
+  font-family: Georgia, serif; font-style: normal;
+  font-size: 8.5pt; line-height: 1.6; padding: 8px 12px;
+  border-radius: 2px; z-index: 100; pointer-events: none;
+  box-shadow: var(--shadow);
+  min-width: 220px; max-width: 280px; white-space: normal;
+  text-align: left;
+}
+.reader-nav .info-val.ent .tip::after {
+  content: ""; position: absolute;
+  top: 100%; left: 50%; transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: var(--tip-bg-light);
+}
+.reader-nav .info-val.ent:hover .tip,
+.reader-nav .info-val.ent:focus .tip { display: block; }
+[data-theme="dark"] .reader-nav .info-val.ent .tip {
+  background: var(--tip-bg); color: var(--tip-fg);
+}
+[data-theme="dark"] .reader-nav .info-val.ent .tip::after {
+  border-top-color: var(--tip-bg);
+}
+.reader-nav .info-val.ent .tip .tip-key {
+  font-variant: small-caps; letter-spacing: 0.1em;
+  color: var(--accent); font-weight: 700; font-size: 8pt;
+  display: block; margin-bottom: 4px;
+  border-bottom: 1px solid var(--rule-soft); padding-bottom: 3px;
+}
+.reader-nav .info-val.ent .tip strong {
+  color: var(--accent); font-weight: 700;
+}
+/* v14+1: Fides tooltip 贴近视口顶部时向下翻转 (避免向上弹出溢出屏幕) */
+.reader-nav .info-val.ent.tip-below .tip {
+  bottom: auto; top: 100%; margin-bottom: 0; margin-top: 8px;
+}
+.reader-nav .info-val.ent.tip-below .tip::after {
+  top: auto; bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--tip-bg-light);
+}
+[data-theme="dark"] .reader-nav .info-val.ent.tip-below .tip::after {
+  border-bottom-color: var(--tip-bg);
+}
+
+/* ============= v5 移动端响应式优化 ============= */
+@media (max-width: 720px) {
+  /* 筛选栏: 折叠后单列 */
+  .filter-collapsible .filter-bar {
+    gap: 8px 0;
+  }
+  /* 卡片网格: 2 列 */
+  #matrix-block .ll-ext-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* 元信息栏: 允许换行, 缩小字段 */
+  .reader-nav .info-bar {
+    gap: 4px 10px;
+  }
+  .reader-nav .info-val {
+    max-width: 120px;
+    font-size: 8pt;
+  }
+  /* tooltip 在移动端改为 tap 触发 (复用 template 模式) */
+  .reader-nav .info-val.ent .tip { display: none; }
+  .reader-nav .info-val.ent.tapped .tip { display: block; }
+}
+@media (max-width: 480px) {
+  /* 卡片单列 */
+  #matrix-block .ll-ext-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* 元信息栏: 垂直堆叠 */
+  .reader-nav .info-bar {
+    flex-direction: column;
+    gap: 2px 0;
+  }
+  .reader-nav .info-item {
+    width: 100%;
+  }
+  .reader-nav .info-val {
+    max-width: 100%;
+  }
+  /* masthead 标题缩小 */
+  .masthead h1.title { font-size: 15pt; }
+}
+
+/* ============================================================
+   Bibliothēca v6 新增样式 (用户 5 点反馈)
+   ------------------------------------------------------------
+   1. 自定义 checkbox 样式 (罗马硬币铭文风 ▢/◆)
+   2. back-bar 拆分后 sticky 样式
+   3. 元信息栏透明化
+   ============================================================ */
+
+/* ============= v6: 罗马硬币铭文风 checkbox (▢/◆) =============
+   用户决策 (问题 5 选项 D): 默认空心方 ▢, 选中实心菱形 ◆
+   灵感: 罗马硬币边缘装饰纹
+   实现: 隐藏原生 checkbox, 用 ::before 显示符号
+   - appearance: none 跨浏览器隐藏原生样式
+   - ::before 用 content 显示 Unicode 符号
+   - :checked 切换 content + color
+   - 颜色: 未选 fg-mute, 选中 accent (酒红/琥珀) */
+.filter-options input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  width: 12px; height: 12px;
+  margin: 0 4px 0 0; cursor: pointer;
+  position: relative;
+  display: inline-block;
+  vertical-align: -2px;
+  background: transparent;
+}
+.filter-options input[type="checkbox"]::before {
+  content: "▢";
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11pt; line-height: 1;
+  color: var(--fg-mute);
+  transition: color 0.2s ease;
+}
+.filter-options input[type="checkbox"]:checked::before {
+  content: "◆";
+  color: var(--accent);
+  font-size: 10pt;
+}
+.filter-options input[type="checkbox"]:hover::before {
+  color: var(--accent);
+}
+.filter-options input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+/* 兼顾目录页 filter-bar 中可能有 checkbox 的其他位置 */
+.filter-group input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  width: 12px; height: 12px;
+  margin: 0 4px 0 0; cursor: pointer;
+  position: relative;
+  display: inline-block;
+  vertical-align: -2px;
+  background: transparent;
+}
+.filter-group input[type="checkbox"]::before {
+  content: "▢";
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11pt; line-height: 1;
+  color: var(--fg-mute);
+  transition: color 0.2s ease;
+}
+.filter-group input[type="checkbox"]:checked::before {
+  content: "◆";
+  color: var(--accent);
+  font-size: 10pt;
+}
+.filter-group input[type="checkbox"]:hover::before {
+  color: var(--accent);
+}
+.filter-group input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
