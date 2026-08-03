@@ -67,10 +67,13 @@
   }
 
   function render(container, reads, today, total) {
+    // 窄屏 (≤720px) 用缩写标签: 报头右栏空间有限, 完整标签会溢出
+    // (旧版 v2 用 CSS display:none 直接隐藏标签, 手机用户看不到统计栏含义)
+    var narrow = typeof window !== 'undefined' && window.innerWidth <= 720;
     var items = [
-      { label: 'L\u0113cti\u014dn\u0113s', value: reads },
-      { label: 'Hodi\u0113', value: today },
-      { label: '\u014cmn\u0113s', value: total }
+      { label: narrow ? 'L\u0113ct.' : 'L\u0113cti\u014dn\u0113s', value: reads },
+      { label: narrow ? 'Hod.' : 'Hodi\u0113', value: today },
+      { label: narrow ? '\u014cmn.' : '\u014cmn\u0113s', value: total }
     ];
     var html = items.map(function (it) {
       var f = formatStat(it.value);
