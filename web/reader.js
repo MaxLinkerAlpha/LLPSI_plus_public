@@ -20,9 +20,11 @@
   'use strict';
 
   // ===== 常量 =====
-  const INDEX_PATH = 'data/combined_index.json?v=19';
-  // .md 文件根目录 (相对 reader.html 所在的 web/ 目录的上一级)
-  const SEGMENTS_DIR = '../books';
+  const INDEX_PATH = 'data/combined_index.json?v=20';
+  // .md 正文分片根目录 (相对 reader.html 所在 web/ 目录)
+  // v4: combined_index.json 精简为纯元数据 (27.5MB -> 3MB), 正文拆分为
+  //     data/segments/{book_slug}/segments/{tail}.md 按篇加载, 移动端不再卡顿
+  const SEGMENTS_DIR = 'data/segments';
 
   // ===== DOM 元素引用 (集中获取, 避免重复查询) =====
   const $content = document.getElementById('segment-content');
@@ -174,18 +176,17 @@
 
   /**
    * 从 segment_id 推断 .md 文件路径 (方案 B 回退用)
-   * segment_id 格式: {book_slug}__section__{NN}
-   * .md 路径: books/{book_slug}/segments/{NNN}.md (3 位补零)
+   * segment_id 格式: {book_slug}__{chapter|story}__{tail}
+   * .md 路径: data/segments/{book_slug}/segments/{tail}.md
+   * tail 原样保留 (如 01.md / 97_a.md / 01_10.md), 避免 parseInt 截断撞名
    */
   function inferMdPath(segmentId) {
     const parts = segmentId.split('__');
     if (parts.length < 3) return null;
     const bookSlug = parts[0];
-    const numPart = parts[parts.length - 1];
-    const num = parseInt(numPart, 10);
-    if (isNaN(num)) return null;
-    const numStr = String(num).padStart(3, '0');
-    return SEGMENTS_DIR + '/' + bookSlug + '/segments/' + numStr + '.md';
+    const tail = parts[parts.length - 1];
+    if (!tail) return null;
+    return SEGMENTS_DIR + '/' + bookSlug + '/segments/' + tail + '.md';
   }
 
   /**

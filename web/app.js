@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var INDEX_PATH = 'data/combined_index.json?v=19';
+  var INDEX_PATH = 'data/combined_index.json?v=20';
   var READER_HREF = 'reader.html';
 
   var FILTER_DIMENSIONS = [
@@ -57,10 +57,18 @@
     if (!s) return '';
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
-  async function fetchJson(path) {
-    var res = await fetch(path);
-    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + res.statusText + ' (' + path + ')');
-    return res.json();
+  async function fetchJson(path, timeoutMs) {
+    // 移动端弱网保护: 超过 timeoutMs 未返回即中断, 避免页面一直停在 "Legēns…"
+    // 旧实现无超时: 网络挂起时请求既不成功也不失败, 造成无限加载 (手机端大索引的典型场景)
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs || 20000) : null;
+    try {
+      var res = await fetch(path, ctrl ? { signal: ctrl.signal } : undefined);
+      if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + res.statusText + ' (' + path + ')');
+      return await res.json();
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
 
   // ===== 筛选选项提取 =====
@@ -521,7 +529,11 @@
       else allSegments = [];
     } catch (e) {
       console.error('[app.js] 加载失败', e);
-      $matrixBlock.innerHTML = '<p class="error">Errōr: nōn potest corpora legere</p>';
+      // 超时 vs 其他错误: 超时多因弱网/大文件, 提示刷新重试
+      var errMsg = (e && e.name === 'AbortError')
+        ? 'Nexus tarda — onerare iterum. (网络较慢, 请刷新重试)'
+        : 'Errōr: nōn potest corpora legere';
+      $matrixBlock.innerHTML = '<p class="error">' + errMsg + '</p>';
       return;
     }
     if (!allSegments || allSegments.length === 0) {
