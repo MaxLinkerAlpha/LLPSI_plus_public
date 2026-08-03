@@ -55,6 +55,15 @@
     return y + '-' + m + '-' + day;
   }
 
+  // GoatCounter 记录的路径 = location.pathname (含 GitHub Pages 子路径前缀,
+  // 如 /LLPSI_plus_public/reader.html)。从当前地址推导同目录的阅读页路径,
+  // 适配任意部署位置 (本地 /reader.html, 子路径 /<repo>/reader.html)。
+  function readerPath() {
+    var idx = location.pathname.lastIndexOf('/');
+    var dir = idx > 0 ? location.pathname.slice(0, idx) : '';
+    return dir + '/reader.html';
+  }
+
   function render(container, reads, today, total) {
     var items = [
       { label: 'L\u0113cti\u014dn\u0113s', value: reads },
@@ -76,7 +85,7 @@
     if (!container) return;
     var today = todayStr();
     Promise.all([
-      fetchGC('//reader.html.json'),   // 阅读次数 (双斜杠: 存储路径含前导 /)
+      fetchGC(readerPath() + '.json'),  // 阅读次数 (路径含子路径前缀, 适配部署位置)
       fetchGC('TOTAL.json', today),     // 今日访问近似 DAU
       fetchGC('TOTAL.json')             // 总访问量
     ]).then(function (results) {
