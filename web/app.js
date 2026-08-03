@@ -216,6 +216,21 @@
 
   // 渲染下一批分组, 返回是否还有剩余
   function renderNextChunk() {
+    var hasMore = _renderOneBatch();
+    // v23: 筛选后新块可能全部被隐藏 (display:none), 哨兵未移动,
+    // IntersectionObserver 检测不到交叉变化不会重新触发.
+    // 循环渲染直到哨兵离开视口或无更多分组.
+    while (hasMore) {
+      var rect = $lazySentinel.getBoundingClientRect();
+      var vp = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top > vp + 900) break;
+      hasMore = _renderOneBatch();
+    }
+    return hasMore;
+  }
+
+  // 渲染单个批次 (RENDER_CHUNK 个分组), 返回是否还有剩余
+  function _renderOneBatch() {
     var start = renderedChunkCount * RENDER_CHUNK;
     var end = Math.min(start + RENDER_CHUNK, currentGroups.length);
     if (start >= currentGroups.length) return false;
