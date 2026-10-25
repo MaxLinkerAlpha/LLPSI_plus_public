@@ -143,7 +143,7 @@ LLPSI_plus/
 为完整拉丁圣经（Nova Vulgata）标注长音的开放项目，是本项目圣经篇章的文本基础（可信度 B 级）。
 
 - 网址：https://github.com/austintheriot/nova-vulgata-with-macrons
-- 许可证：公版 + macrons 公开
+- 许可证：**不是公版** —— Nova Vulgata 文本版权归 Libreria Editrice Vaticana（梵蒂冈圣座）；本项目仅使用其社区长音标注版本作学习参考
 
 ### 6. Project Gutenberg
 
@@ -184,4 +184,8 @@ LLPSI_plus/
 
 > 长音标注工具：[Alatius Latin Macronizer](https://alatius.com/macronizer/)，由 Johan Winge 开发，以上多个来源的长音均由其自动生成后再经人工校对。
 >
-> 若您也是拉丁语开源读物作者/维护者，希望本项目收录您的作品，欢迎联系我们。我们严格遵守版权，仅收录公版或开放许可证的文本。
+> 若您也是拉丁语开源读物作者/维护者，希望本项目收录您的作品，欢迎联系我们。
+>
+> 本项目以**公版与开放许可文本**为主体；另有少量**在版教材选段**用于学习对照，
+> 其著作权归各出版方所有，**不在本项目授权范围内**，详见 [NOTICE.md](NOTICE.md)。
+> 如任何权利人认为收录超出可接受范围，联系我们后将在 48 小时内移除。
